@@ -32,9 +32,9 @@ x();
 
 #### Answer: B
 
-This question reminds us about Closure in JS. Closure allows us to create a `stateful function` and such function can access to variable outside of its scope. In a nutshell, a closure can have access to `global` variable (scope), `father function` scope and `its` own scope.
+This question revisits closure - one of the most confusing concepts in JavaScript. Closure allows us to create a `stateful function` and such a function can access to the variable outside of its scope. In a nutshell, a closure can have access to the `global` variable (scope), `father function` scope and `its` own scope.
 
-We have here 3, 3, 3 and 3, 4, 5 because first we simply call the function `a()`. It works like a normal function and we do not see something `stateful` here. In later case, we declare a variable `x` and it stores the value of function `a(1)`, that is why we get 3. 4. 5 rather than 3, 3, 3.
+We have here, the only one correct answer, 3, 3, 3 and 3, 4, 5 because first we simply call the function `a()`. It works like a normal function and we have not seen anything so-called `stateful` yet. In the following code, we declare a variable `x` and it stores the value of function `a(1)`, that is why we get 3. 4. 5 rather than 3, 3, 3.
 
 This kind of gotcha gives me the feeling of `static` variable in PHP world.
 
@@ -403,28 +403,28 @@ Technically, `x` and `y` have the same value. Both are empty objects. However, w
 ```javascript
 console.log("hello");
 
-setTimeout(() => console.log("hey"), 1);
-setTimeout(() => console.log("kiora"), 2);
 setTimeout(() => console.log("world"), 0);
 
 console.log("hi");
 ```
 
-- A: "hello" "hey" "kiora" "world" "hi"
-- B: "hello" "hi" "hey" "kiora" "world"
-- C: "hello" "hi" "world" "hey" "kiora"
-- D: "hello" "hi" "hey" "world" "kiora"
+- A: "hello" -> "world" -> "hi"
+- B: "hello" -> "hi" -> "world"
+- C: "hi" -> "world" -> "hello"
+- D: "hi" -> "hello" -> "world"
 
 <details><summary><b>Answer</b></summary>
 <p>
 
-#### Answer: D
+#### Answer: B
 
-Given that three setTimeout() functions will be kept in the `task queue` before jumping back to `stack`, "hello" and "hi" will be printed first, then A is totally incorrect.
+Given that the function setTimeout() will be kept in the `task queue` before jumping back to `stack,` "hello" and "hi" will be printed first, then A is incorrect. That is also the case of the answers C and D.
 
-We might have the feeling that three setTimeout() functions should be executed in the order "world" -> "hey" -> "kiora" providing that the time we have set are 0 mil second -> 1 mil second -> 2 mil second respectively. Yet, there is no different between 0 and 1 mil second. That is why we will see "hey" in the next. "world" is being executed then and following by the last on "kiora".
+No matter how many seconds you set to the `setTimeout()` function, it will run after synchronous code. So we will get "hello" first as it is put into the call stack first. Though the `setTimeout()` is then being put into the call stack, it will subsequently offload to web API (or Node API) and then being called when other synchronous codes are cleared. It means we then get "hi" and finally "world".
 
-For reference, read this https://stackoverflow.com/questions/8341803/difference-between-settimeoutfn-0-and-settimeoutfn-1
+So B is the correct answer.
+
+Credit: @kaitoubg (voz) for your suggestion regarding the ` timeout throttled` by which I have decided to alter the question slightly. It will ensure that readers will not get confused as the previous code might bring out different results when tested on other browsers or environments. The main point of the question is about the discrepancy between the synchronous code and asynchronous code when using `setTimeout.`.
 
 </p>
 </details>
@@ -491,6 +491,10 @@ console.log(x.hi + Object.keys(x).length);
 First we have an empty object `x`, then we add another property `hi` for x with `x.__proto__.hi`. Note this is equivalent to `Object.prototype.hi = 10` and we are adding to the `father` object `Object` the property `hi`. It means every single object will inherit this propety. The property `hi` becomes a shared one. Say now we declare a new object such as `let y = {}`, `y` now has a propery `hi` inherited from the `father` `Object`. Put it simply `x.__proto__ === Object.prototype` returns `true`.
 
 Then we overwrite the property `hi` with a new value 11. Last we have 11 + 1 = 12. `x` has one property and `x.hi` returns 11.
+
+Updated (July 27th 2021). If you write `Object.prototype.hi = 11;` instead of `Object.prototype.hi = ++x.hi;` as written in the code above, then `Object.keys(x)` will return an empty array as `Object.keys(object)` only returns the property of the object itself, not the inherited ones. It means the final result will be 11 rather than 12. For some reason, the code ``Object.prototype.hi = ++x.hi;` will create a property for the object `x` itself and then `Object.keys(x)` gives us the array `["hi"]`.
+
+Yet, if you run `console.log(x.hasOwnProperty("hi"))` it still returns `false`. By the way, when you deliberately add a property for x such as `x.test = "testing"`, then `console.log(x.hasOwnProperty("test"))` returns `true`.
 
 </p>
 </details>
@@ -672,13 +676,13 @@ helloRonaldo();
 
 #### Answer: D
 
-We can use `call()`, `apply()` and `bind()` to appy a function to any object. At first sight, it seems that three functions do the same thing. Yet there are some situations where they are differently employed to handle respective contexts or solve particular problems.
+We can use `call()`, `apply()` and `bind()` to apply a function to any object. At first sight, it seems that three functions do the same thing. Yet there are some situations where they are differently employed to handle respective contexts or solve particular problems.
 
 Of the three, only `bind()` can be executed after binding. We can create a variable to store the result as `helloRonaldo()` in the code snippet above. `apply()` and `call()` will bind and execute the function at the same time. `apply()` hints us `a` ~ array where we need to pass an array as parameter. `call()` hints us `c` or comma where we pass parameters with a comma. You might want to have a look at this post https://stackoverflow.com/questions/15455009/javascript-call-apply-vs-bind
 
 Note that `window.window.window.score` or `window.score` or simply `score` do the same thing. It points to the `score()` function in the global scope.
 
-The correct anwser is D. The `score()` and `getAge()` functions are nothing special.
+The correct anwser is D. The `score()` and `getAge()` functions are nothing special. The only tricky part is that `this.age` is incremented each time you call the funtion `getAge()`;
 
 </p>
 </details>
@@ -1277,7 +1281,7 @@ club.Me();
 
 #### Answer: D
 
-The code snippet above is not a big challenge for you I guess. It simply gives you an example of `this` in different contexts when we declare an anonymous function inside a method of an object. The three first methods are common ways to handle `this` using `this` as second parameter in `map()`, by using `bind(this)` in `forEach` (or map()) or by `that = this`technique (we did use `seft` rathern `that`).
+The code snippet above is not a big challenge for you I guess. It simply gives you an example of `this` in different contexts when we declare an anonymous function inside a method of an object. The three first methods are common ways to handle `this` using `this` as second parameter in `map()`, by using `bind(this)` in `forEach` (or map()) or by `that = this`technique (you might see people use `self = this` rather than `that= this`).
 
 The last method `Me()` will cause unexpected result because `this.name` does not bind to the object `club`. Note that you might get another result when testing the code on jsbin.com. On Chrome and Firefox, we get 0.
 
@@ -2178,9 +2182,11 @@ console.log(myYoutube.content().name);
 
 To answer the tricky question above, you might want to have a look at the concept of `this` in JavaScript (on browser environment). By default, `this` refers to `window` object. Note that `Window` (written in capital) is the Function constructor of the `window` object. In this regard, `console.log(this === window)` return true but `console.log(this === Window)` returns false.
 
-As `getInfo()` is an arrow function, `this` declared inside this function points to `window`, so `myYoutube.content()` returns `myYoutube.getInfo()`. Noted that we have to explicitly write `myYoutube.getInfo()` to make sure the code will run correctly as `this` in this case does not work as it does not refer to the currect object. In the function `getInfo()`, however, `this` actually refers to the currect object instead of `window` object because we use a normal function here.
+As `content()` is an arrow function, `this` declared inside this function points to `window`, so `myYoutube.content()` returns `myYoutube.getInfo()`. Noted that we have to explicitly write `myYoutube.getInfo()` to make sure the code will run correctly as `this` in this case does not work as it does not refer to the currect object. In the function `getInfo()`, however, `this` actually refers to the currect object instead of `window` object because we use a normal function here.
 
 Then we have the property `name` with the value "hoccoban". So the correct answer is A.
+
+Credit: Thanks https://github.com/phanvigiaii for fixing the typo. Please make a pull request when you have time bro. Cheer.
 
 </p>
 </details>
@@ -2533,18 +2539,16 @@ So the correct answer is B.
 ###### 64. What's the output?
 
 ```javascript
+const App = ([y, x, z]) => {
+  return () => {
+    ++x;
+    return () => {
+      return x++;
+    };
+  };
+};
 
-const App = ([y, x, z]) => {			
-	return ()=>{
-			++x
-		return ()=>{
-			return x++;
-		}
-	}	
-}
-
-console.log(App([10, 20, 30, 40])()())
-
+console.log(App([10, 20, 30, 40])()());
 ```
 
 - A: 10
@@ -2561,7 +2565,7 @@ To answer the question raised on the above code snippet, you might want to revis
 
 First, `currying function` means we convert a function with multiple parameters into multiple functions with a SINGLE parameter. Then you can easily manipulate the flow of the data. Noted that `currying function` is relevant to `higher-order function`, you might want to have a look.
 
-`destructing array or object` means we attempt to extract a complex array or object more conveniently. For example, `[y, x, z] = [10, 20, 30, 40]` will extract y, x and z with the value 10, 20 and 30 respectively. 
+`destructing array or object` means we attempt to extract a complex array or object more conveniently. For example, `[y, x, z] = [10, 20, 30, 40]` will extract y, x and z with the value 10, 20 and 30 respectively.
 
 The last thing is incremental operator here `++x` returns 21 but `x++` does not as it still returns 21.
 
@@ -2573,19 +2577,20 @@ So the correct answer is C.
 ###### 65. What's the output?
 
 ```javascript
-
 const numbers = [5, 6, 7];
 
-function callback(accumulator, currentValue){
-	return accumulator + currentValue;
+function callback(accumulator, currentValue) {
+  return accumulator + currentValue;
 }
 
 const theCallBack = (accumulator, currentValue) => accumulator + currentValue;
 
-const sum = numbers.reduce(callback, numbers.reduce(theCallBack, numbers.reduce(theCallBack, 7)));
+const sum = numbers.reduce(
+  callback,
+  numbers.reduce(theCallBack, numbers.reduce(theCallBack, 7))
+);
 
-console.log(sum); 
-
+console.log(sum);
 ```
 
 - A: 54
@@ -2598,7 +2603,7 @@ console.log(sum);
 
 #### Answer: D
 
-`Array.prototype.reduce()` is a bit perplexed built-in method that allows you to manipulate data in an array. It returns a single value from the array predefined as in the case with `map` or `filter`. The syntaxt of the function is `arr.reduce(callback( accumulator, currentValue, [, index[, array]] )[, initialValue])`, so it accepts a callback function with four arguments including `accumulator`, `currentValue`, `currentIndex` (optional) and `array` (optional). 
+`Array.prototype.reduce()` is a bit perplexed built-in method that allows you to manipulate data in an array. It returns a single value from the array predefined as in the case with `map` or `filter`. The syntaxt of the function is `arr.reduce(callback( accumulator, currentValue, [, index[, array]] )[, initialValue])`, so it accepts a callback function with four arguments including `accumulator`, `currentValue`, `currentIndex` (optional) and `array` (optional).
 
 The second argument of the `reduce` method, which is optional, is called `initialValue` that will be counted as the first element with the index 0 when `reduce` is executing. If `initialValue` is not provided, then `reduce` will run with the index 1 instead. `reduce()` sounds complicated, but truly it is not. In case you want to revise the function, kindly take a look at MDN here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce
 
@@ -2614,21 +2619,17 @@ So the correct answer is D.
 </p>
 </details>
 
-
-
 ###### 66. What's the output?
 
 ```javascript
+const a = { name: "hoccoban.com" };
+const b = { name: "youtube.com/hoccoban" };
 
-const a = {name: "hoccoban.com"};
-const b = {name: "youtube.com/hoccoban"};
+const first = { ...a }.name.length;
+const second = { ...a, ...b }.name.length;
+const third = { ...a, ...b, name: "hello" }.name.length;
 
-const first = {...a}.name.length;
-const second = {...a, ...b}.name.length;
-const third = {...a, ...b, name: "hello"}.name.length;
-
-console.log(first + second + third)
-
+console.log(first + second + third);
 ```
 
 - A: 12
@@ -2645,7 +2646,7 @@ The code snippet above is relatively trivial. What we can learn from it is all a
 
 We have two simple objects which both have the same key `name` but different values. The constant `first` gives us the length of the string value of the keyword `name` that is copied from `a`. So, `first` is now 12.
 
-The constant `second` merges `a` and `b` into one object. However, as `b` has the same key `name` with `a', the object created by merging two objects will have the value of `b`. It means the constant`second` gives us the length of `youtube.com/hoccoban`, which is 20.
+The constant `second` merges `a` and `b` into one object. However, as `b` has the same key `name` with `a`, the object created by merging two objects will have the value of `b`. It means the constant `second` gives us the length of `youtube.com/hoccoban`, which is 20.
 
 `third` does the same thing with `first` and `second` as it merges two objects into one. However, it also adds another key-value to the object. Coincidently, the key now is `name`, which is the same with the key attained from `a` and `b`. Hence, this key and value will take over the merged object. That means `third` is the length of the string `hello`, which is 5.
 
@@ -2655,6 +2656,1439 @@ So the correct answer is B.
 
 </p>
 </details>
+
+###### 67. What's the output?
+
+```javascript
+const hocCoBan = {};
+
+Object.defineProperty(hocCoBan, "domain", {
+  value: "hoccoban.com",
+});
+
+async function App({ year, age }) {
+  return year - age + hocCoBan.domain.length;
+}
+
+App({ year: 2021, age: 30 }).then((r) => console.log(r));
+```
+
+- A: 2051
+- B: 2001
+- C: 30
+- D: 2003
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: D
+
+The code snippet above seems complicated regarding how we take advantage of `Object.defineProperty` to add key and value to the object `hocCoBan`. In fact, `Object.defineProperty` has a couple of handy features that allow us to control the behavior of the object in some situations where we want to make sure that the object created is mutable or not, whether it is iterable (using `for..in`) and so for. For example, if we set `configurable: false` when we declare an object with `Object.defineProperty`, we cannot use `delete` operator to delete the object's property. We cannot change the value of that property as well.
+
+The second "take away" message when reading the code above is the unpacking object technique, or a more frequent term is the destructing object. Say you have an object with two keys called `year` and `age`, then you can get them by using the destructing object technique as follows: `{year, age} = theOBject;`. In the code above, when declaring the function `App`, we also use destructing object technique to get the key from the object and use them as the parameters.
+
+If you are familiar with asynchronous code in JavaScript when using the keyword `async,` it is not a big deal to understand why we need to use `then` to get the function `App` being called. It fact, `async` always returns a promise, so we need to use `then` method to get the data we want.
+
+The flow of the code is: 2021 - 30 + `"hoccoban.com".length` (which is 12).
+
+The final result is 2003. So the correct answer is D.
+
+</p>
+</details>
+
+###### 68. What's the output?
+
+```javascript
+class hoccoban {
+  #thisyear = 2021;
+  constructor(covidTheFirstYear) {
+    this.covidTheFirstYear = covidTheFirstYear;
+  }
+
+  getThisYear() {
+    return this.#thisyear;
+  }
+
+  getCovidFirstYear() {
+    return this.covidTheFirstYear;
+  }
+}
+
+const message = new hoccoban(2019);
+
+const result =
+  hoccoban.hello ?? message.getThisYear() - message.getCovidFirstYear();
+
+console.log(result);
+```
+
+- A: NaN
+- B: 2019
+- C: undefined
+- D: 2
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: D
+
+This challenge partly illustrates the newest features of JavaScript detailed in ECMAScript 2020 or ES11.
+
+Now you can declare a private property in a class thanks to the symbol `#`. Like other languages, a private property in JavaScript can only be accessed from inside the class. It will trigger an error when you attempt to call it outside the class, surely.
+
+The second feature you might see on the code snippet above is the `nullish coalescing operator` or `??`. When declaring some variable such as `let myVariable = number ?? 7`, if the variable `number` is either `undefined` or `null`, the variable `myVariable` will be assigned the value `7`.
+
+So `hoccoban.hello` means `undefined` because we have not added any value yet. Then by using `nullish coalescing operator` with `??` the variable `result` simply returns 2 as `message.getThisYear()` gives us 2020 and `message.getCovidFirstYear()` gives us 2019. Note that we can access the private property outside of the class via a method, as in the method `getThisYear()`.
+
+So the correct answer is D.
+
+</p>
+</details>
+
+###### 69. What's the output?
+
+```javascript
+const keyWords = "hello world";
+
+const entries = keyWords.split(" ");
+
+const collections = [];
+
+entries.forEach((entry, index) => {
+  collections.push([entry, index]);
+});
+
+const objectResult = Object.fromEntries(collections);
+
+const { world } = objectResult;
+
+console.log(world);
+```
+
+- A: 0
+- B: true
+- C: 1
+- D: "hello"
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: C
+
+The code snippet above is not challenging for those who have had decent experience working with ES6 I suppose. First we turn `keywords` into an array using `split()` function. Then we create a variable named `collection`, which initially is an empty array.
+
+Take a closer look at the `forEach` function, which allows us to run a for loop through the whole array `entries`, you might realize that `push([entry, index]);` add an array to `collections` rather than an element.
+
+The next step is by taking advantage of `Object.fromEntries()` that converts an array with at least two elements (the form of key-value) to an object. This built-in method is the reversing version of `Object.entries()`, which extracts key and value from an object to an array.
+
+`const { world } = objectResult;` is nothing special as we unpack the object using destructing object technique supported since ES6. As the object `objectResult` has `hello` and `world` with two respective values 0 and 1, we get 1 when printing out `world`, so the correct answer is C.
+
+</p>
+</details>
+
+###### 70. What's the output?
+
+```javascript
+const target = {
+  domainname: "hoccoban.com",
+  author: "vuong",
+};
+
+const handler = {
+  get: function (thetarget, prop, receiver) {
+    if (prop === "domainname") {
+      return thetarget.author.length;
+    } else {
+      return thetarget.domainname.length;
+    }
+  },
+};
+
+const proxyObject = new Proxy(target, handler);
+
+console.log(proxyObject.domainname > proxyObject.author);
+```
+
+- A: true
+- B: false
+- C: 12
+- D: 5
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: B
+
+We have implemented a basic use case of `Proxy` in the code snippet above. Each `proxyObject` object has two parameters (`target` and `handler`). `handler` is also an object.
+
+Apart from `get()` as you might see, `handler` also has a handful of other methods such as `set`, `defineProperty()`, `has()` and so forth. Sometimes, people may say a `method is a trap` of a proxy object.
+
+Back to the code above, the `get` method allows us to modify how the proxy object will display the value of the original object. `thetarget` is the original object, and `prop` is the property of that object as you might guess. You might choose another name in the `get` function if you want when creating your handler.
+
+The `handler` above calculates the length of the string value of the two properties. Based on the flow of `if - else` code, it swaps the returned value.
+
+So `proxyObject.domainname` now should be understood as `target.author.length` which means 5 and `proxyObject.author` means `target.domainname.length` which gives us 12. So the output is `false`. The correct answer is B.
+
+If you do the same thing with the original, it should be something like `console.log(target.domainname.length > target.author.length)` which returns `true`.
+
+I believe that `Proxy` is worth to have a closer look. If that is the case, no place is better than MDN. So have a go at: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+
+</p>
+</details>
+
+###### 71. What's the output?
+
+```javascript
+const promise1 = new Promise((resolve, reject) => {
+  setTimeout(() => resolve("hello"), 5000);
+});
+
+const promise2 = new Promise((resolve, reject) => {
+  setTimeout(() => resolve("world"), 4000);
+});
+
+(async () => {
+  console.time("timeleap");
+
+  const p1 = await promise1;
+
+  const p2 = await promise2;
+
+  console.log(`${p1} ${p2}`);
+
+  console.timeEnd("timeleap");
+})();
+```
+
+- A: Promise { <pending> } - "hello world" - timeleap: ~ 5000 ms
+- B: Promise { <pending> } - "hello world" - timeleap: ~ 9000 ms
+- C: Promise { <pending> } - "hello world" - timeleap: ~ 4000 ms
+- D: Promise { <pending> } - "hello world" - timeleap: ~ 1000 ms
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: A
+
+We have already had a couple of questions regarding asynchronous code in general and handling the data flow with promise in particular. If you understand how JS works, I am sure that the code challenge above is not difficult.
+
+We have two promises; each takes 5 or 4 seconds to complete the code and returns "hello" (in `promise1`) and "world" (in `promise2`) in the `resolve` methods, respectively.
+
+Then we take advantage of the `async` function to chain the two promises to get the result we want. As `async` function returns a `promise` so to get the returned value from `async` function, we have to use `then()` method. As we do not do that here, then we get `Promise { <pending> }`.
+
+The question is, does `p2` have to wait and only run after `p1` complete? It turns out that it does not. Both `p1` and `p2` run simultaneously in the task queue thanks to web API or nodejs API (the environments by which JavaScript engine runs). So it will not take 9 seconds to finish the code but solely around 5. It means `promise1` takes 5 seconds to complete and at the same time, `promise2` reaches the bottom within only 4 seconds.
+
+That is why A is the correct answer.
+
+Updated: What happens if `promise2` takes 6 seconds instead of 4 ? Well, as `promise2` runs almost at the same time with `promise1`, it will only take 1 second after the `promise1` completes. So in total, it takes approximately 6 seconds.
+
+</p>
+</details>
+
+###### 72. What's the output?
+
+```javascript
+const promise1 = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve("hello"), 5000);
+  });
+};
+
+const promise2 = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve("world"), 4000);
+  });
+};
+
+(async () => {
+  console.time("timeleap");
+
+  const p1 = await promise1();
+
+  const p2 = await promise2();
+
+  console.log(`${p1} ${p2}`);
+
+  console.timeEnd("timeleap");
+})();
+```
+
+- A: Promise { <pending> } - "hello world" - timeleap: ~ 5000 ms
+- B: Promise { <pending> } - "hello world" - timeleap: ~ 9000 ms
+- C: Promise { <pending> } - "hello world" - timeleap: ~ 4000 ms
+- D: Promise { <pending> } - "hello world" - timeleap: ~ 1000 ms
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: B
+
+The 72nd challenge is almost identical to the 71st. Please take a closer look.
+
+The difference lies in the way we declare a promise. In question 71st, we use two constants, and both return promise, but in question 72, we declare functions and each returns a promise.
+
+If you run the code, you might be surprised with the result as it takes around 9 seconds to complete the code in place of 5 seconds as in the previous question.
+
+It means that `const p1 = await promise1;` and `const p1 = await promise1();` are different as the latter (a function) might block the callstack and `const p2 = await promise2();` can only be called after the `p1` completes. The two do not run in parallel as the two promises in the previous question.
+
+As it takes 9 seconds to finish, B is the correct answer.
+
+</p>
+</details>
+
+###### 73. What's the output?
+
+```javascript
+let history = {
+  year: 2021,
+  getYear: function () {
+    console.log(this.year);
+  },
+};
+
+setTimeout(history.getYear, 0);
+setTimeout(history.getYear.bind(history), 10);
+
+const { year, getYear } = history;
+getYear();
+```
+
+- A: undefined - undefined - 2021
+- B: undefined - 2021 - 2021
+- C: 2021 - undefined - 2021
+- D: 2021 - 2021 - 2021
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: A
+
+We have three outputs on the code above. First, we have a simple object with one property and one method. Noted that the method point to the property `year` using `this` keyword. The problem now happens when we attempt to extract data from the object.
+
+Be aware of the `setTimeout` method, which will create a separated context that is different from the original object's context. Even though in `setTimeout(history.getYear, 0);` we have explicitly called the object `history`, setTimeout will still execute the function `history.getYear` with`this` pointing to the global object. So it returns `undefined.`
+
+`getYear();` is extracted from the object we have defined in the beginning. But as `this` is out of the original context when executing the function, it returns `undefined`. This code is called last, but the output is displayed first on the console window as it is a synchronous code.
+
+`setTimeout(history.getYear.bind(history), 10);` runs last and will give us 2021 as it is bound to the object `history`. Finally, we get `undefined - undefined - 2021,` and A is the correct answer.
+
+</p>
+</details>
+
+###### 74. What's the output?
+
+```javascript
+class handleCovid {
+  constructor(start) {
+    this.start = start;
+  }
+
+  calculate(someValue) {
+    this.start = this.start + someValue;
+    return this.start;
+  }
+
+  vaccine() {
+    ++this.start;
+    return this;
+  }
+
+  delaying() {
+    ++this.start;
+    return this;
+  }
+
+  static getFinal(result) {
+    return result * 2;
+  }
+}
+
+const now = new handleCovid(2019);
+
+console.log(handleCovid.getFinal(now.vaccine().delaying().calculate(2020)));
+```
+
+- A: 2019
+- B: 8082
+- C: 8080
+- D: 8084
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: B
+
+The code snippet above is ugly and sounds complicated at first. Yet, you might encounter a situation when some good "take away" messages might be given. The flow of the code is not hard to understand, I suppose.
+
+First, a function in JavaScript can accept another function as its parameter. With regard to the `static` keyword, it means we can directly call a static method in the form of `className.staticmethod` without invoking the object created by the normal way `new ClassName`.
+
+Besides, you might want to have a look at how we chain more than one method together. That is possible if these methods `return this`.
+
+Now let break it down:
+
+- `calculate(2020)` --> 2019 + 2020 = 4039;
+- `delaying().calculate(2020)` --> 4040;
+- `now.vaccine().delaying().calculate(2020)` --> 4041;
+- `handleCovid.getFinal(now.vaccine().delaying().calculate(2020)` --> 4041 \* 2 = 8082;
+
+So the correct answer is B.
+
+</p>
+</details>
+
+###### 75. What's the output?
+
+```javascript
+function HappyNewYear() {
+  return "hello";
+}
+
+const year2021 = new HappyNewYear();
+year2021.__proto__.greeting = "happy";
+HappyNewYear.prototype.say = "new year";
+
+console.log(year2021.__proto__ === HappyNewYear.prototype);
+console.log(Object.getPrototypeOf(year2021) === HappyNewYear.prototype);
+console.log(Reflect.getPrototypeOf(year2021) === HappyNewYear.prototype);
+
+console.log(year2021.__proto__ === Object.prototype);
+console.log(year2021 instanceof HappyNewYear);
+console.log(year2021 instanceof Object);
+
+const thisyear = new HappyNewYear();
+console.log(`${thisyear.greeting} ${thisyear.say}`);
+```
+
+- A: true - true - true - false - true - false - "happy new year"
+- B: true - true - true - false - false - true - "happy new year"
+- C: true - true - true - true - true - true - "happy new year"
+- D: true - true - true - false - true - true - "happy new year"
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+#### Answer: D
+
+The code snippet above helps us revise the concept of `prototype` in JavaScript with two essential keywords: `__proto__` and `FunctionName.prototype`. I believe that the code `console.log(year2021.__proto__ === HappyNewYear.prototype);` is the key to understand the difference between the two. So, in short, every single object in JavaScript has a built-in property `__proto__` that gives us an overview of the built-in (internal) [[Prototype]]. They are the things (property and method) the object inherits from the "parent" function constructor or class).
+
+For example, if you declare a literal object such as `const a = {}` then `a.__proto__ === Object.prototype` returns `true` because `a` inherits the prototype from the "parent" `Object`. However, if an object is created using function constructor then the "parent" prototype is function constructor itself instead of the `Object`. So while `console.log(year2021.__proto__ === HappyNewYear.prototype);` returns `true`, `console.log(year2021.__proto__ === Object.prototype);` gives us `false`.
+
+Be aware of `Object.getPrototypeOf (object)` and `Reflect.getPrototypeOf(object)`. The two are recommended to use as `__proto__` is being deprecated.
+
+You might want to read more about `__proto__` at MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/proto
+
+The correct answer is D, and btw "happy new year"!
+
+</p>
+</details>
+
+###### 76. What's the output?
+
+```javascript
+const address = {
+  name: "hoccoban.com",
+  author: "Vuong Nguyen",
+};
+
+const key = Reflect.has(address, "author")
+  ? Reflect.ownKeys(address)[0]
+  : "hello";
+
+Reflect.set(address, "language", "JavaScript");
+
+const totalKeys = Reflect.ownKeys(address).length;
+
+const name = Reflect.get(address, key).length;
+
+const language = Reflect.get(address, "language").length;
+
+console.log(totalKeys + name + language);
+```
+
+- A: 22
+- B: 10
+- C: 20
+- D: 25
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The correct answer is D. Why? Now let break it down:
+
+- `Reflect.has(address, 'author')` gives us `true` given that the object `address` has the key `author`. Simple as it is. So the value of the variable `key` is now `Reflect.ownKeys(address)[0]`, which in fact is the key `name`.
+
+- `Reflect.set(address, 'language', 'JavaScript');` set another key-value to the object `address`.
+
+- `Reflect.ownKeys(address).length;` gives us 3 because now it has three keys, so `totalKeys` is now 3.
+
+- `Reflect.get(address, key).length;` gives us the length of the string `hoccoban.com` which is 12.
+
+- `Reflect.get(address, 'language').length` is the length of the string `JavaScript`, which is 10.
+
+- The final answer is 3 + 12 + 10 = 25.
+
+#### Answer: D
+
+</p>
+</details>
+
+###### 77. What's the output?
+
+```javascript
+const myModule = (function () {
+  const covidYear = 2019;
+
+  const year = 2021;
+
+  function getYear() {
+    return year;
+  }
+
+  function getCovidYear() {
+    return covidYear;
+  }
+
+  function exposeYear() {
+    return getYear();
+  }
+
+  function exposeCovidYear() {
+    return getCovidYear();
+  }
+
+  return {
+    nothing: undefined ?? null ?? null ?? undefined,
+    exposeYear,
+    exposeCovidYear,
+  };
+})();
+
+const result =
+  myModule.nothing ?? myModule.exposeYear() + myModule.exposeCovidYear();
+
+console.log(result);
+```
+
+- A: 2021
+- B: 2019
+- C: 4040
+- D: undefined
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The challenge above will help you revise the `revealing pattern` and thanks to it you can declare a private variable in JavaScript. Note that we can now declare a `private` property in a class in modern JavaScript, so the above way of writing a private variable seems old-fashioned.
+
+First, we have an IIFE function - immediately invoked function expressions. There are two variables and two functions as well. However, in the `return`, there are three key-values. We can not directly access the two variables `covidYear` and `year` except for using some already-built functions inside the IIFE.
+
+If you feel the keyword `??` is odd, then you might want to have a look at the latest syntax supported in modern JavaScript called "Nullish Coalescing Operator". It means, if the left element is either `undefined` or `null`, the value of the right element will be assigned.
+
+In short, we have `myModule.exposeYear()` (2021) and `myModule.exposeCovidYear()` (2019). In total, the final result is 4040. So the correct answer is C.
+
+#### Answer: C
+
+</p>
+</details>
+
+###### 78. What's the output?
+
+```javascript
+class HocCoban {
+  constructor(address) {
+    this.address = address;
+    this.youtube = "";
+  }
+  get getAddress() {
+    return this.address;
+  }
+
+  set setYoutube(channel) {
+    this.youtube = channel;
+  }
+
+  getYoutube() {
+    return this.youtube.length;
+  }
+}
+
+const web = new HocCoban("hoccoban.com");
+
+web.setYoutube = "youtube.com/hoccoban";
+
+console.log(web.getAddress);
+
+console.log(web.youtube);
+
+console.log(web.getYoutube());
+```
+
+- A: "hoccoban.com" - "youtube.com/hoccoban" - 20
+- B: "hoccoban.com" - function() - 20
+- C: function() - "youtube.com/hoccoban" - 20
+- D: function() - function() - 20
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+`set` and `get` are commonly called setter and getter. When declaring a method in a class and putting the keyword `set` or `get` before it, you can then call them without using `parenthesis - ()`. Put another way, when using `get` and `set`, you can directly get or set the value of/for the properties. Somehow it might be convenient in some cases.
+
+Be aware of the methods declared with a `getter` as we just need to call the method as we call a property (without using parenthesis).
+
+If you know how a traditional method works in JavaScript, then the code challenge above is not difficult, I suppose. The answer is A.
+
+#### Answer: A
+
+</p>
+</details>
+
+###### 79. What's the output?
+
+```javascript
+const result = ["ronaldo", "messi", "neymar", "Ronaldo", "LuKaKUUUU"].sort();
+
+console.log(result);
+```
+
+- A: ["LuKaKUUUU", "Ronaldo", "messi", "neymar", "ronaldo"]
+- B: ["LuKaKUUUU", "messi", "neymar", "Ronaldo","ronaldo"]
+- C: ["LuKaKUUUU", "messi", "neymar", "ronaldo", "Ronaldo"]
+- D: ["messi", "neymar", "ronaldo", "Ronaldo", "LuKaKUUUU"]
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+In JavaScript, the built-in `sort()` method sorts the elements of an array. It returns a sorted array in ascending order. Note that each element will be converted to strings and then compared according to the sequences of UTF-16 code unit values. What does it mean?
+
+It means, "banana" < "cherry" or 80 < 9 (because "80" < "9" in the Unicode order).
+
+If you run the following code `const result = [9, 11, 89].sort();`, the constant `result` will be sorted as `[11, 8, 9]` rather than `[9, 11, 89]` because the engine will convert the number value to string.
+
+The following codes might give you a hint about the relationship between character and number. Ultimately, as the computer can only understand 0 and 1, all characters and even decimal numbers are then converted to 1 and 0. `charCodeAt()` gives us the decimal value of any string evaluated.
+
+`console.log("LuKaKUUUU".charCodeAt(0))` or `console.log("LuKaKUUUU".charCodeAt())` ==> 76
+`console.log("Ronaldo".charCodeAt(0))` or `console.log("Ronaldo".charCodeAt())` ==> 82
+`console.log("messi".charCodeAt(0))` or `console.log("messi".charCodeAt())` ==> 109
+`console.log("neymar".charCodeAt(0))` or `console.log("neymar".charCodeAt())` ==> 110
+`console.log("ronaldo".charCodeAt(0))` or `console.log("ronaldo".charCodeAt())` ==> 114
+`console.log("9".charCodeAt())` or `console.log("99".charCodeAt())` ==> 57
+`console.log("80".charCodeAt())` or `console.log("8".charCodeAt())` ==> 56
+
+Noted that if index is not a number, it defaults to 0. The answer is A.
+
+#### Answer: A
+
+</p>
+</details>
+
+###### 80. What's the output?
+
+```javascript
+const anArray = typeof [];
+const aTypeOfNull = typeof null;
+
+const weirdFirst = null instanceof Object;
+const weirdSecond = [] instanceof Object;
+const weirdThird = [] instanceof Array;
+
+console.log(anArray);
+console.log(aTypeOfNull);
+
+console.log(weirdFirst);
+console.log(weirdSecond);
+console.log(weirdThird);
+```
+
+- A: "array" - "null" - false - true - true
+- B: "array" - "object" - false - true - true
+- C: "object" - "object" - false - false - true
+- D: "object" - "object" - false - true - true
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+In the 80th challenge question, we will review some fundamental "issue" or "weird" features in JavaScript relating to the `typeof` and `instance` operators. Given that the original version of the JavaScript language was designed in just 10 days, there are a bundle of inconsistent behaviors that cannot be fixed. They are permanent features existing in the modern language. If we fix it, a lot of websites might crash.
+
+The above code shows us some of the weird features in JavaScript. For example, `[]` is an array but the `typeof []` gives us `object`. Note that you might take advantage of `Array.isArray([])` rather than `typeof` to examine whether a variable is an array or not.
+
+`typeof null;` is another weird operator as it returns `object`. However `null instanceof Object;` returns `false`. ~WhatTheHell~!!!
+
+Man, `[] instanceof Object;` and `[] instanceof Array;` both return `true`. How inconsistent it is.
+
+The answer is D.
+
+#### Answer: D
+
+</p>
+</details>
+
+###### 81. What's the output?
+
+```javascript
+class Dog {
+  speak() {
+    return this.say();
+  }
+
+  say() {
+    console.log("hello world");
+  }
+}
+
+class Cat {
+  speak() {
+    return this.say();
+  }
+
+  say() {
+    console.log("kia ora");
+  }
+}
+
+const animal = new Dog();
+animal.speak();
+Object.setPrototypeOf(animal, Cat.prototype);
+animal.speak();
+```
+
+- A: "hello world" - undefined
+- B: "kia ora" - "kia ora"
+- C: "hello world" - "kia ora"
+- D: "hello world" - "hello world"
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The central issue/concept mentioned in the code above is the method `Object.setPrototypeOf(object, prototype)`. It is one of the features in ES6, or ECMAScript 2015. Another way to set the prototype of an object is `Object.prototype.__proto__` but the latter is controversial.
+
+At first, `animal.speak();` gives us "hello world" which is no surprise. Yet, in the second call, we get "kia ora" instead of "hello world". When checking the prototype with `Object.getPrototypeOf(animal)`, you might see that `Cat` is the prototype of the object `animal` rather than `Dog`.
+
+The answer is C.
+
+By the way, `kia ora` means `hello` in the Māori language.
+
+#### Answer: C
+
+</p>
+</details>
+
+###### 82. What's the output?
+
+```javascript
+const js = [9, 10];
+
+function mutate(a, b) {
+  a.push(b);
+}
+
+mutate(js, 1);
+console.log(js);
+```
+
+- A: [9, 10]
+- B: [9, 10, 1]
+- C: [1, 9, 10]
+- D: ReferenceError
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The code snippet might be pretty trivial if you have already obtained a solid understanding of the two different concepts: `reference` and `value.` In JavaScript, non-primitive type such as array and object does not store the value but the reference.
+
+Also, as the arguments in function are passed by the reference, the function `mutate` will push another element into the array `js`. Finally, the initial variable 'js' is updated with the new value `[9, 10, 1]`.
+
+If the variable `js` is assigned a primitive value such as string or number, no matter how the function `mutate`, it will not mutate the initial variable 'js'. However, if the variable is an object, then it will also be mutated, as in the case of an array in the code above.
+
+B is the correct answer.
+
+#### Answer: B
+
+</p>
+</details>
+
+###### 83. What's the output when running the code on a browser?
+
+```javascript
+console.log(this === window);
+console.log(this === frames);
+console.log(this === globalThis);
+console.log(this === self);
+console.log(this === global);
+```
+
+- A: true - true - true - true - "ReferenceError"
+- B: true - false - true - true - "ReferenceError"
+- C: true - true - true - true - true
+- D: true - true - "ReferenceError" - true - "ReferenceError"
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The code snippet above might output different results if running on other environments than the browser. For example, there is no `self`, `window`, or `frames` on Nodejs.
+
+`global` plays the role of the global object in Nodejs, but that is not the case in the browser environment. In contrast, `globalThis` is available in both browser and Nodejs environments.
+
+The first takeaway message is that Nodejs does have `this`, `global`, and `globalThis`. Browser environment has 5 ones including `this`, `globalThis`, `window`, `frames`, and `self`.
+
+The second takeaway message is that Web Worker only has `self` as the global object.
+
+Ultimately, A is the correct answer.
+
+#### Answer: A
+
+</p>
+</details>
+
+###### 84. What's the output ?
+
+```javascript
+class StackHocCoBan {
+  constructor() {
+    this.stack = [];
+  }
+
+  push(thing) {
+    return this.stack.push(thing);
+  }
+
+  pop() {
+    return this.stack.pop();
+  }
+
+  peek() {
+    return this.stack[this.length - 1];
+  }
+
+  get length() {
+    return this.stack.length;
+  }
+
+  isEmpty() {
+    return this.length === 0;
+  }
+}
+
+const firstThing = new StackHocCoBan();
+
+firstThing.push(firstThing.length);
+firstThing.push(firstThing.length);
+!firstThing.isEmpty() ? firstThing.push(firstThing.length) : firstThing.length;
+firstThing.pop();
+
+console.log(firstThing.peek() + firstThing.length + firstThing.pop());
+```
+
+- A: 3
+- B: 4
+- C: 5
+- D: 6
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The code challenge above is a bit lengthy, frankly. But it might practically help you to revise the concept of `stack` implemented in JavaScript. Such a concept is quite crucial when it comes to the algorithm, so to say. It appears that `stack` and `queue` are blood brothers, and as a developer, you are always advised to master these concepts along with array, linked list, tree, graphs, and so on.
+
+In my opinion, both `stack` and `queue` are simply arrays, but they are exclusively built to serve some particular jobs with strict requirements. You might see `pop()` or `push()` in the code above are standard native methods we often use when working with the array.
+
+So now `firstThing` is an object initiated by the class `StackHocCoBan`. As the class's construct initially triggers an empty array ` this.stack = [];`, first the code `firstThing.push(firstThing.length);` will actually push the number 0 into the array given that `firstThing.length` returns 0 as the stack, at the beginning` is empty.
+
+Then `firstThing.push(firstThing.length);` (the second one) pushes number 1 to the stack as we have already had one item (the number 0).
+
+`firstThing.isEmpty()` returns `false` because we have two things in the stack. Yet, be causious with "!" before it. As we write `!firstThing.isEmpty()`, the code with call `firstThing.push(firstThing.length)` rather than `firstThing.length;`. It is a simply short-hand of `if-else`.
+
+So, the stack is pushed the number 2 because `firstThing.length` returns 2. So now the stack is as [0, 1, 2], beautiful, right?
+
+`firstThing.pop()` will eliminate the number 2 and the stack is now [0, 1].
+
+The last line of the code above is `firstThing.peek()` (1) + `firstThing.length` (2) + `firstThing.pop()` (1).
+
+So B is the correct answer.
+
+#### Answer: B
+
+</p>
+</details>
+
+###### 85. What's the output ?
+
+```javascript
+class QueueHocCoBan {
+  constructor() {
+    this.queue = [];
+  }
+
+  enqueue(item) {
+    return this.queue.unshift(item);
+  }
+
+  dequeue() {
+    return this.queue.pop();
+  }
+
+  peek() {
+    return this.queue[this.length - 1];
+  }
+
+  get length() {
+    return this.queue.length;
+  }
+
+  isEmpty() {
+    return this.queue.length === 0;
+  }
+}
+
+const items = new QueueHocCoBan();
+
+items.enqueue("constructor");
+items.enqueue("QueueHocCoBan");
+items.enqueue("hoccoban.com");
+
+const item = items.peek().length - items.length;
+
+console.log(item);
+```
+
+- A: 6
+- B: 7
+- C: 8
+- D: 9
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+Following up the question 85th, we now pay the attention to another important concepts - `queue` - which is a bit different from `stack`. While `stack` leverages two native array methods `push()` (for adding new item) and `pop()`(for extracting new item), `queue` utilises `unshift()` (for adding new item) and `pop()` (for extracting new item). In essense, both `stack` and `queue` are array and thus the difference between them, IMO, lays in the way `push()` and `unshift()` are implemented for adding new item. While `push()` adds a new item/element at the end/tail of the array, `unshift()` adds the new one to the top/head of the array itself.
+
+First, the object `items` will add three new elements into the array (initiated by the constructor) at the top one by one, thanks to the method `enqueue`. The array will look like this ["hoccoban.com", "QueueHocCoBan", "constructor"];
+
+Now `items.peek()` gives us "constructor" and thus `items.peek().length` returns 11. `items.length` simply returns 3 and so the final result will be 8.
+
+So C is the correct answer.
+
+By way of summarisation, using `queue`, we can only take out the first element (also the tail of the array) with the method `dequeue().` You might need to find another way to extract other elements of the queue.
+
+#### Answer: C
+
+</p>
+</details>
+
+###### 86. What's the output ?
+
+```javascript
+const domains = new Map();
+
+domains.set("site", "hoccoban.com");
+domains.set("youtube", "youtube.com/hoccoban");
+
+const keys = domains.keys();
+const values = domains.values();
+
+let result = domains.has("hoccoban.com")
+  ? values.next().value
+  : keys.next().value;
+
+console.log(result);
+```
+
+- A: "site"
+- B: "hoccoban.com"
+- C: "youtube"
+- D: "youtube.com/hoccoban"
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+There are two ways hash tables are implemented in JavaScript: object and Map(). Hash tables are data structures created to store information in the form of key-value.
+
+While the native object defined as {} is trivial for a JavaScript developer, a new way to design a hash table has been recently added into the language. When writing `const domains = new Map();`, we have declared an object with a couple of different features as opposed to the veteran one declared in the form of `{}` or `new Object` we all know.
+
+You are advised to take advantage of the built-in methods such as `set()`, `get()`, `has()` or `delete()` among others to manipulate the map object.
+
+Note that a map object can be iterated using `for of`. You might need to use `next().value` to extract the raw information written. At this point, you might want to revisit `function generator` to see why we need to do that.
+
+Both `keys()` and `values()` are native methods of the class `Map`. You might see that they works on a map object as in a normal object. Back to the code snippet above, `let result = domains.has("hoccoban.com") ? values.next().value: keys.next().value` returns `keys.next().value` given that `domains.has("hoccoban.com")` returns `false`.
+
+So `console.log(result)` gives us "site", so A is the correct answer.
+
+Note that if you want to extract "youtube", you must run `keys.next().value` twice.
+
+#### Answer: A
+
+</p>
+</details>
+
+###### 87. What's the output ?
+
+```javascript
+function inner(flag) {
+  hello = 10;
+  if (flag) {
+    return ++hello;
+  }
+  return --hello;
+}
+
+var hello = 12;
+inner(hello > 11 ? false : true);
+console.log(hello);
+```
+
+- A: 9
+- B: 10
+- C: 11
+- D: 12
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+As a variable in JavaScript can be declared without any functional keyword such as var, let, or const standing before the variable name, as seen on the code above, this challenge sounds a bit odd as now developers tend to use `const` or `let` everywhere. What happened when we do that? The variable will have a global scope no matter where it has been written initially. So first, the variable `hello` will be accessed anywhere outside of the function scope whenever (after to be exact) the function inner has been executed.
+
+Then we redeclare the `hello` variable with a different value.
+
+The code `inner(hello>11? false: true)` is translated to `inner(false)`, so the variable `hello` declared inside this function is mutated to 9.
+
+As `hello` is now 9 instead of 12, A is the correct answer.
+
+#### Answer: A
+
+</p>
+</details>
+
+###### 88. What's the output ?
+
+```javascript
+const collections = ["a", [123], true, "c", { abc: "hello world" }];
+const iterator = collections.values();
+
+const a = iterator.next().value.length;
+const b = iterator.next().value.length;
+const c = iterator.next().value.toString().length;
+const d = iterator.next().value.length;
+const e = Object.values(iterator.next().value)[Number(a > b)].length;
+
+console.log(a + b + c + d + e);
+```
+
+- A: 12
+- B: 14
+- C: 16
+- D: 18
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The code snippet above is frankly tedious as it does not solve any big problem but is still written in a very cryptic manner, honestly. I want you to pay a bit more attention to the native function to manipulate array `values()`. For your information, I also use `Object.values()` so that you can somehow make a comparison between the two by yourself.
+
+In the beginning, we have a very simple array packed with different types of data such as boolean, string, array and object. The code `collections.values();` returns an iterator, so you can not simply access to each element as an usual array. You might run a `for of` loop here to render all of the elements in this iterator. By doing that, the way iterator works is likely a typical array.
+
+So how do we access a single element in this iterator? We need to use `next().value`. Each time we call it, the iterator will render the value, one by one, starting with the first element.
+
+It means `const a = iterator.next().value.length;` returns 1. So a is 1. So does b. C is a bit different and we have 4 here as `true`, a boolean, is converted to a string. d is 1. So
+
+The code in e is not fascinating, I suppose. `Object.values` gives us an array of value defined in the object `{ abc: "hello world" }`. `[Number(a > b)]` give us [0]. So e is simply the length of the string "hello world", which is 11.
+
+Finally, in the console we have 1 + 1 + 4 + 1 + 11 = 18. So D is the correct answer.
+
+#### Answer: D
+
+</p>
+</details>
+
+###### 89. What's the output ?
+
+```javascript
+const matrix = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+];
+
+function matrixHandle(m) {
+  let total = arguments[0][0][0];
+  let length = m.length;
+  for (let i = 0; i < length; i++) {
+    for (let j = 0; j < m[i].length; j++) {
+      total += m[i][j];
+    }
+  }
+  return total;
+}
+
+console.log(matrixHandle(matrix));
+```
+
+- A: 44
+- B: 45
+- C: 46
+- D: 47
+
+<details><summary><b>Answer</b></summary>
+<p>
+You can easily create a two-dimensional array by nesting an array inside the parent one as the variable `matrix` above. To render all of the elements in the matrix, we implement a simple code with two for-loop functions which are nested.
+
+`arguments[0][0][0];` gives us 1 because `arguments` has wrapped the variable `matrix` in an array. Note that `arguments` is a Array-like.
+
+So the variable `total` at first is 1, and then the final value cumulated by looping through the matrix is 46.
+
+In short, we have 1 + 1 + 2 + 3 + 4 + 5 + 6 + 7+ 8 + 9 = 46. So C is the correct answer.
+
+#### Answer: C
+
+</p>
+</details>
+
+###### 90. What's the output ?
+
+```javascript
+const container1 = {
+  stack: "Docker",
+  getStack: function () {
+    return this.stack;
+  },
+};
+const a = container1.getStack();
+
+const container2 = {
+  stack: "Kubernetes",
+  getStack: () => this.stack,
+};
+const b = container2.getStack();
+
+const container3 = {
+  architect: "microservice",
+  getStack: function () {
+    const stack = ["K8s"];
+    return stack.map(function (element) {
+      return `${element} - ${this.architect}`;
+    });
+  },
+};
+const c = container3.getStack();
+
+const container4 = {
+  architect: "microservice",
+  getStack: function () {
+    const stack = ["K8s"];
+    return stack.map((element) => `${element} - ${this.architect}`);
+  },
+};
+const d = container4.getStack();
+
+console.log(`${a} -> ${b} -> ${c} -> ${d}`);
+```
+
+- A: "Docker -> Kubernetes -> K8s - undefined -> K8s - microservice"
+- B: "Docker -> Kubernetes -> K8s - microservice -> K8s - microservice"
+- C: "Docker -> undefined -> K8s - microservice -> K8s - undefined"
+- D: "Docker -> undefined -> K8s - undefined -> K8s - microservice"
+
+<details><summary><b>Answer</b></summary>
+<p>
+The code above might help you revise how the arrow function works in different contexts, especially when dealing with the keyword `this` in JavaScript. There are two crucial takeaway messages you might need to keep in mind when using a function, as follows:
+
+- First: The arrow function does not create a new `this` binding when you use them. It inherits from the parent one(environment) when it is defined.
+
+- Second: The keyword `this` could be problematic when it is called in a callback function. For example when implementing `setTimeout`, `setInterval` or `map`, `filter`, `reduce` or `some`, `every` among others, you will need to pass a callback function. Given that the callback function changes the context, `this` might therefore change to `global` object and no longer point to the parent object.
+
+We have 4 objects in the snippet above. Each has a simple property and a trivial method. `a` returns `docker` because `this.stack` exactly points to the object declared `container1`. However, `b` returns `undefined` because `this` in the arrow function points to the global one rather than `container2`. Why? As we mentioned above, the arrow function does not create a context for itself, so `container2.getStack()` is still bound to the global object. `this.stack` becomes `undefined` as a result.
+
+Next `c` gives us `K8s - undefined` because `this` is called in the callback function when we use `map`. A new context is now created by the function `map`, so `this` will not point to the object `container3`. The callback function implemented with `map` or `filter` always creates a new context so that `this` changes.
+
+We get `K8s - microservice"` in `d` because the arrow function helps us fix the problem caused by switching context as in the object `container3`. Here are some lessons learned when dealing with context, nested functions (or implementing callback function):
+
+- Use normal function rather than arrow function when you write a method inside an object in which the method does not have a nested function(method) or callback one. Arrow function is not recommended when creating object prototypes, classes along with object literals as well.
+
+- Use the arrow function when you want to access to `this`, especially in the case of nested method (function) or when using callback function. Otherwise, `this` will no longer point to the object in these cases (nested method or using callback function with map, filter). There are two other techniques (old-fashion ones) to fix that.
+
+- There are 3 ways to fix `this` issue relating to the nested method or callback function: using arrow function as mentioned above, use `self = this` technique or explicitly binding with `call`, `bind` or `apply` method.
+
+#### Answer: D
+
+</p>
+</details>
+
+###### 91. What's the output ?
+
+```javascript
+class Angular {
+  vendor = "Google";
+  lang = "TypeScript";
+  overview() {
+    let report = [];
+    report.push(this.lang);
+    report = report.map(function (e) {
+      return e.length + this.vendor.length;
+    });
+
+    return report;
+  }
+}
+
+const me = new Angular();
+
+console.log(me.overview());
+```
+
+- A: 16
+- B: 106
+- C: NaN
+- D: TypeError
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The code snippet above might help you revise the concept of context in conjunction with the way `this` is treated in JavaScript. In short, if you implement a callback function for the `map` method (or in another case: nested function), then you might need to pay attention to `this` binding.
+
+While `report.push(this.lang);` works pretty well as `this` points to the property declared within the class `Angular`, the line `return e.length + this.vendor.length;` does not work as `this` no longer points to `vendor` we have already declared as a property in the class. The `map` function creates a new context here. As `vendor` is undefined inside the callback of the `map` function, we get `TypeError` in the console. So D is the correct answer.
+
+How to fix that? We can quickly fix this one with one of three techniques: (1) use arrow function for the callback passing to `map`, (2) temporarily create an alternative `this` such as `let self = this` before we call map and use `self` instead of `this`. (3) explicitly bind the callback for `map` using bind, call or apply. We can also pass `this` as the second parameter for the map function. It also works.
+
+#### Answer: D
+
+</p>
+</details>
+
+###### 92. What's the output ?
+
+```javascript
+class FrameWork {
+  constructor(options) {
+    this.options = options ?? ["Angular", "React", "Vue"];
+  }
+
+  total() {
+    return this.options.length;
+  }
+
+  filter() {
+    const selected = this.options.filter(function (element) {
+      return element[0] === "A";
+    });
+    return selected[0].length + this.total();
+  }
+}
+
+const app = new FrameWork();
+
+console.log(app.filter());
+```
+
+- A: 8
+- B: 2
+- C: 10
+- D: 1
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The code challenge above implements a simple class with two methods. There is only one point in the syntax that you might need to pay a bit more attention to is `??` (nullish coalescing operator ) which is quite similar to `||` (OR).
+
+`??` returns the right-hand side value if the left-hand side is either `null` or `undefined` while `||` does the same thing for `falsy` value (false, null, undefined, 0, -0, 0n, NaN, "").length
+
+So as we do not pass anything into the constructor when we initiate the object `app`, `this.options` takes the default value `["Angular", "React", "Vue"]`, then the method `total()` evaluates the length of the array, which is 3.
+
+`filter()` gives us the length of "Angular", which is 8. So the final value is 10. The correct answer is C.
+
+#### Answer: C
+
+</p>
+</details>
+
+###### 93. What's the output ?
+
+```javascript
+const origin = [[[123], 321], 213];
+const manipulated = origin.flat(origin.length);
+console.log(manipulated.length + origin.length);
+```
+
+- A: 2
+- B: 3
+- C: 4
+- D: 5
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The challenge might hopefully help you have a grip on the native array method `flat()`, which is quite handy to flatten a nested array. `flat()` accepts a parameter that defines the level of the nested array you are going to manipulate. By default, this parameter is 1.
+
+The method returns a manipulated array. So on the code about `origin.length` returns 2 given that the array `origin` has two elements. When flattening the original array named `origin` with `flat(2)`, we then have a new array `[123, 321, 213]`.
+
+Finally, we have 5 in the console, and D is the correct answer.
+
+#### Answer: D
+
+</p>
+</details>
+
+###### 94. What's the output ?
+
+```javascript
+const pipe =
+  (...funs) =>
+  (v) => {
+    funs.reduce((res, func) => {
+      return func(res);
+    }, v);
+  };
+
+const plusFour = (v) => v + 4;
+const multiplyBySix = (v) => v * 6;
+const divideByTwo = (v) => v / 2;
+
+pipe(plusFour, multiplyBySix, divideByTwo, multiplyBySix, console.log)(1);
+```
+
+- A: 80
+- B: 90
+- C: 100
+- D: 110
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The `pipe` function can receive an unlimited number of arguments/parameters thanks to rest parameter `...funcs`. These arguments/parameters turn out are function as we call the parent function `pipe`. In JavaScript, it is quite common to pass a function as a parameter of another function.
+
+Please call these functions, which are passed to `pipe`, are child functions. They are then looped and executed one by one with `reduce` method, no matter how many functions you attempt to pass to `pipe`. `v` in the code is simply the argument defined in each child function.
+
+So first we have 1, then by executing `plusFour` it becomes 5. When `multiplyBySix` is called, the output turns to 30. It becomes 15 when we call `divideByTwo`. Finally, it becomes 90 as we multiply 15 \* 6 when the function `multiplyBySix` is called again.
+
+So B is the correct answer.
+
+<!-- Credit: https://www.freecodecamp.org/news/pipe-and-compose-in-javascript-5b04004ac937/ -->
+
+#### Answer: B
+
+</p>
+</details>
+
+###### 95. What's the output ?
+
+```javascript
+const quickSortRecursive = function (arrayInput) {
+  if (!Array.isArray(arrayInput)) {
+    console.log("The input data is not an array");
+    return arrayInput;
+  }
+  const pivotIndex = arrayInput.length - 1;
+  const pivot = arrayInput[pivotIndex];
+  const left = [];
+  const right = [];
+  let currentItem;
+  for (let i = 0; i < pivotIndex; i++) {
+    currentItem = arrayInput[i];
+    if (currentItem < pivot) {
+      left.push(currentItem);
+    } else {
+      right.push(currentItem);
+    }
+  }
+
+  return [...quickSortRecursive(left), pivot, ...quickSortRecursive(right)];
+};
+
+console.log(quickSortRecursive([1, 100, 8, 19, 8, 6]));
+```
+
+- A: [1, 100, 8, 19, 8, 6]
+- B: [1, 6, 8, 8, 19, 100]
+- C: [100, 19, 8, 8, 6, 1]
+- D: 6
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+You might see a commonly used algorithm here in the code challenge called "quicksort" in which we apply the strategy "divide and conquer". We also use the "recursive" method when we want to recall the function until it meets our expectations. You might also need to know about the "rest parameter" in JavaScript, as shown by the three dots (...) above.
+
+The code above helps us to arrange an array in such a way that the value will increase from left to right. Using the quicksort method, we need to create a pivot (likely the first item from right to left or the first item from left to right). First, we divide the original array into two parts: left and right, depending on the value compared to the pivot.
+
+Next, by calling the function recursively, we keep creating new pivots for the right and left arrays created above for the purpose of sorting value.
+
+Finally, the original array is sorted from left to right depending on the value.
+
+So B is the correct answer.
+
+<!-- Credit: https://www.freecodecamp.org/news/pipe-and-compose-in-javascript-5b04004ac937/ -->
+
+#### Answer: B
+
+</p>
+</details>
+
+###### 96. What's the output ?
+
+```javascript
+const hasOwn = (a) => {
+  return function (o = { a: 10 }) {
+    o.property = a[1];
+    return (b) => {
+      return o.a + o.property + b;
+    };
+  };
+};
+
+console.log(hasOwn([10, 20])()(10));
+```
+
+- A: 10
+- B: 20
+- C: 30
+- D: 40
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+We have quite trivial nested functions. If you are familiar with the concept of `closure` in JavaScript, then it is not a big deal to read the code above. The final function, named hasOwn, has three parameters, and when we execute it, we only pass two arguments because we have already defined the default value for the second nested function.
+
+The final result is as `o.a + o.property + b`, meaning 10 + 20 + 10. So D is the correct answer.
+
+#### Answer: D
+
+</p>
+</details>
+
+
+
+###### 97. What's the output ?
+
+```javascript
+function craft(text){
+  const p = document.createElement("p");
+  p.innerHTML = text;
+  document.body.append(p)
+}
+craft("1 - sync A")
+const fetchItem = new Promise((resolve) => {   
+  craft("2 - eager sync B")  
+  setTimeout(function(){      
+      craft("3 - eager async C")
+      resolve("4 - async - D");
+  }, 2000)  
+});
+craft("5 - sync E") 
+
+fetchItem.then(data => craft(data))
+```
+
+- A: 1 - 2 - 3 - 4 - 5 
+- B: 1 - 2 - 5 - 3 - 4
+- C: 1 - 2 - 5 - 4 - 3
+- D: 1 - 2 - 3 - 5 - 4
+
+<details><summary><b>Answer</b></summary>
+<p>
+
+The order will be: sync --> async. Given that Promise is eager, then we have 1 - 2 - 5 - 3 - 4. Note that if we do not call then(), the data handled by promise will not be casted out. 
+
+#### Answer: B
+
+</p>
+</details>
+
+
+
+
+
+
+
 
 
 
